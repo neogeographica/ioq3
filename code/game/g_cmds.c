@@ -938,6 +938,71 @@ static void SanitizeChatText( char *text ) {
 	}
 }
 
+// SURVEYOR MOD BEGIN
+/*
+==================
+BeaconNumberFromArgs
+
+Returns a beacon number from the command argv
+Returns -1 if argv is invalid
+==================
+*/
+int BeaconNumberFromArgs(void) {
+	char	arg[MAX_TOKEN_CHARS];
+	int		argNum;
+
+	if ( trap_Argc() != 2 ) {
+		return -1;
+	}
+
+	trap_Argv( 1, arg, sizeof( arg ) );
+	if ( StringIsInteger( arg ) ) {
+		argNum = atoi( arg );
+		if ( argNum == 1 || argNum == 2 ) {
+			return argNum;
+		}
+	}
+
+	return -1;
+}
+
+/*
+==================
+Cmd_Beacon_f
+==================
+*/
+static void Cmd_Beacon_f( gentity_t *ent ) {
+	int	argNum;
+
+	argNum = BeaconNumberFromArgs();
+
+	if ( argNum == -1 ) {
+		trap_SendServerCommand( ent-g_entities, "print \"Usage: beacon <1|2>\n\"" );
+		return;
+	}
+
+	trap_SendServerCommand( ent-g_entities, va("print \"beacon %i\n\"", argNum) );
+	beacon_fire( ent );
+}
+
+/*
+==================
+Cmd_BeaconDel_f
+==================
+*/
+static void Cmd_BeaconDel_f( gentity_t *ent ) {
+	int	argNum;
+
+	argNum = BeaconNumberFromArgs();
+
+	if ( argNum == -1 ) {
+		trap_SendServerCommand( ent-g_entities, "print \"Usage: beacondel <1|2>\n\"" );
+		return;
+	}
+
+	trap_SendServerCommand( ent-g_entities, va("print \"beacondel %i\n\"", argNum) );
+}
+// SURVEYOR MOD END
 
 /*
 ==================
@@ -1726,6 +1791,16 @@ void ClientCommand( int clientNum ) {
 
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
+	// SURVEYOR MOD BEGIN
+	if (Q_stricmp (cmd, "beacon") == 0) {
+		Cmd_Beacon_f (ent);
+		return;
+	}
+	if (Q_stricmp (cmd, "beacondel") == 0) {
+		Cmd_BeaconDel_f (ent);
+		return;
+	}
+	// SURVEYOR MOD END
 	if (Q_stricmp (cmd, "say") == 0) {
 		Cmd_Say_f (ent, SAY_ALL, qfalse);
 		return;

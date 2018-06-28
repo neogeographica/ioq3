@@ -548,7 +548,11 @@ void CG_InitConsoleCommands( void ) {
 	// the game server will interpret these commands, which will be automatically
 	// forwarded to the server after they are not recognized locally
 	//
-	trap_AddCommand ("kill");
+	// SURVEYOR MOD BEGIN
+	trap_AddCommand ("beacon");
+	trap_AddCommand ("beacondel");
+	// SURVEYOR MOD END
+    trap_AddCommand ("kill");
 	trap_AddCommand ("say");
 	trap_AddCommand ("say_team");
 	trap_AddCommand ("tell");

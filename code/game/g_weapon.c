@@ -678,6 +678,7 @@ void Weapon_LightningFire( gentity_t *ent ) {
 	}
 }
 
+
 #ifdef MISSIONPACK
 /*
 ======================================================================
@@ -792,6 +793,41 @@ void CalcMuzzlePointOrigin ( gentity_t *ent, vec3_t origin, vec3_t forward, vec3
 	SnapVector( muzzlePoint );
 }
 
+
+// SURVEYOR MOD BEGIN
+/*
+======================================================================
+
+BEACON
+
+======================================================================
+*/
+
+void beacon_fire (gentity_t *ent) {
+	vec3_t		end;
+	trace_t		trace;
+	gentity_t	*tent;
+
+	AngleVectors (ent->client->ps.viewangles, forward, right, up);
+	CalcMuzzlePointOrigin ( ent, ent->client->oldOrigin, forward, right, up, muzzle );
+	VectorMA (muzzle, 8192, forward, end);
+
+	trap_Trace (&trace, muzzle, NULL, NULL, end, ent->s.number, MASK_SOLID|MASK_WATER );
+
+	// snap the endpos to integers to save net bandwidth, but nudged towards the line
+	// XXX maybe don't do this for beacons?
+	SnapVectorTowards( trace.endpos, muzzle );
+
+	// send railgun beam effect w/ explosion at end
+	tent = G_TempEntity( trace.endpos, EV_RAILTRAIL );
+	VectorCopy( muzzle, tent->s.origin2 );
+	VectorMA( tent->s.origin2, 4, right, tent->s.origin2 );
+	VectorMA( tent->s.origin2, -1, up, tent->s.origin2 );
+	tent->s.eventParm = DirToByte( trace.plane.normal );
+
+	tent->s.clientNum = ent->s.clientNum;
+}
+// SURVEYOR MOD END
 
 
 /*
