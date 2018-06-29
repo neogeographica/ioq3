@@ -982,7 +982,7 @@ static void Cmd_Beacon_f( gentity_t *ent ) {
 	}
 
 	trap_SendServerCommand( ent-g_entities, va("print \"beacon %i\n\"", argNum) );
-	beacon_fire( ent );
+	FireBeacon( ent );
 }
 
 /*

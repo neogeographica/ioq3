@@ -803,7 +803,7 @@ BEACON
 ======================================================================
 */
 
-void beacon_fire (gentity_t *ent) {
+void FireBeacon (gentity_t *ent) {
 	vec3_t		end;
 	trace_t		trace;
 	gentity_t	*tent;
