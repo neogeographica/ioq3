@@ -981,8 +981,7 @@ static void Cmd_Beacon_f( gentity_t *ent ) {
 		return;
 	}
 
-	trap_SendServerCommand( ent-g_entities, va("print \"beacon %i\n\"", argNum) );
-	FireBeacon( ent );
+	FireBeacon( ent, argNum );
 }
 
 /*
@@ -1000,7 +999,7 @@ static void Cmd_BeaconDel_f( gentity_t *ent ) {
 		return;
 	}
 
-	trap_SendServerCommand( ent-g_entities, va("print \"beacondel %i\n\"", argNum) );
+	KillBeacon( ent, argNum );
 }
 // SURVEYOR MOD END
 

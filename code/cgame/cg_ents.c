@@ -514,6 +514,60 @@ static void CG_Missile( centity_t *cent ) {
 	CG_AddRefEntityWithPowerups( &ent, s1, TEAM_FREE );
 }
 
+// SURVEYOR MOD BEGIN
+/*
+===============
+CG_Beacon
+===============
+*/
+static void CG_Beacon( centity_t *cent ) {
+	refEntity_t			inner_ent;
+	refEntity_t			outer_ent;
+
+	memset( &inner_ent, 0, sizeof(inner_ent) );
+	VectorCopy( cent->lerpOrigin, inner_ent.origin );
+	VectorCopy( cent->lerpOrigin, inner_ent.oldorigin );
+
+	inner_ent.reType = RT_SPRITE;
+	inner_ent.radius = 3;
+	inner_ent.rotation = 0;
+	inner_ent.customShader = cgs.media.plasmaBallShader;
+	if ( cent->currentState.generic1 == 1 ) {
+		outer_ent.shaderTime = 0;
+	} else {
+		outer_ent.shaderTime = 3;
+	}
+	trap_R_AddRefEntityToScene( &inner_ent );
+
+	memset( &outer_ent, 0, sizeof(outer_ent) );
+	VectorCopy( cent->lerpOrigin, outer_ent.origin );
+	VectorCopy( cent->lerpOrigin, outer_ent.oldorigin );
+
+	outer_ent.reType = RT_SPRITE;
+	outer_ent.radius = 10;
+	outer_ent.customShader = cgs.media.railRingsShader;
+	if ( cent->currentState.generic1 == 1 ) {
+		outer_ent.shaderTime = 0;
+		outer_ent.shaderRGBA[0] = 0xff;
+		outer_ent.shaderRGBA[1] = 0x40;
+		outer_ent.shaderRGBA[2] = 0x40;
+	} else {
+		outer_ent.shaderTime = 3;
+		outer_ent.shaderRGBA[0] = 0x40;
+		outer_ent.shaderRGBA[1] = 0x40;
+		outer_ent.shaderRGBA[2] = 0xff;
+	}
+	outer_ent.shaderRGBA[3] = 0xff;
+	trap_R_AddRefEntityToScene( &outer_ent );
+
+	if ( cent->currentState.generic1 == 1 ) {
+		trap_R_AddLightToScene( cent->currentState.origin2, 100, 0.5, 0.0, 0.0);
+	} else {
+		trap_R_AddLightToScene( cent->currentState.origin2, 100, 0.0, 0.0, 1.0);
+	}
+}
+// SURVEYOR MOD END
+
 /*
 ===============
 CG_Grapple
@@ -975,6 +1029,11 @@ static void CG_AddCEntity( centity_t *cent ) {
 	case ET_MOVER:
 		CG_Mover( cent );
 		break;
+	// SURVEYOR MOD BEGIN
+	case ET_BEACON:
+		CG_Beacon( cent );
+		break;
+	// SURVEYOR MOD END
 	case ET_BEAM:
 		CG_Beam( cent );
 		break;

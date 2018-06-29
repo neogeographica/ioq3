@@ -803,10 +803,11 @@ BEACON
 ======================================================================
 */
 
-void FireBeacon (gentity_t *ent) {
+void FireBeacon ( gentity_t *ent, int num ) {
 	vec3_t		end;
 	trace_t		trace;
-	gentity_t	*tent;
+	gentity_t	*zap_ent;
+	gentity_t   *beacon_ent;
 
 	AngleVectors (ent->client->ps.viewangles, forward, right, up);
 	CalcMuzzlePointOrigin ( ent, ent->client->oldOrigin, forward, right, up, muzzle );
@@ -818,14 +819,44 @@ void FireBeacon (gentity_t *ent) {
 	// XXX maybe don't do this for beacons?
 	SnapVectorTowards( trace.endpos, muzzle );
 
-	// send railgun beam effect w/ explosion at end
-	tent = G_TempEntity( trace.endpos, EV_RAILTRAIL );
-	VectorCopy( muzzle, tent->s.origin2 );
-	VectorMA( tent->s.origin2, 4, right, tent->s.origin2 );
-	VectorMA( tent->s.origin2, -1, up, tent->s.origin2 );
-	tent->s.eventParm = DirToByte( trace.plane.normal );
+	// create temporary beam effect
+	zap_ent = G_TempEntity( trace.endpos, EV_RAILTRAIL );
+	VectorCopy( muzzle, zap_ent->s.origin2 );
+	VectorMA( zap_ent->s.origin2, 4, right, zap_ent->s.origin2 );
+	VectorMA( zap_ent->s.origin2, -1, up, zap_ent->s.origin2 );
+	zap_ent->s.eventParm = 255;
+	zap_ent->s.clientNum = ent->s.clientNum;
 
-	tent->s.clientNum = ent->s.clientNum;
+	// destroy old beacon if any
+	KillBeacon ( ent, num );
+
+	// create beacon
+	beacon_ent = G_Spawn();
+	G_SetOrigin( beacon_ent, trace.endpos );
+	beacon_ent->classname = "beacon";
+	beacon_ent->parent = ent;
+	beacon_ent->count = num;
+	beacon_ent->s.eType = ET_BEACON;
+	beacon_ent->s.generic1 = num;
+	beacon_ent->r.ownerNum = ent->s.number;
+	// also set a location 5 units away from surface, for light origin
+	VectorMA( trace.endpos, 5.0, trace.plane.normal, beacon_ent->s.origin2 );
+	trap_LinkEntity( beacon_ent );
+}
+
+void KillBeacon ( gentity_t *ent, int num ) {
+	gentity_t   *beacon_ent;
+
+	beacon_ent = g_entities;
+	for ( ; beacon_ent < &g_entities[level.num_entities]; beacon_ent++ ) {
+		if ( !beacon_ent->inuse ) {
+			continue;
+		}
+		if ( beacon_ent->count == num && beacon_ent->parent == ent ) {
+			G_FreeEntity( beacon_ent );
+			break;
+		}
+	}
 }
 // SURVEYOR MOD END
 

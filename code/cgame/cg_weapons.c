@@ -1205,12 +1205,6 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	centity_t	*nonPredictedCent;
 	orientation_t	lerped;
 
-	// SURVEYOR MOD BEGIN
-	// always register rail core effect for beacon use
-	// XXX It is overkill to register all rail-weapon stuff; need better way.
-	CG_RegisterWeapon( WP_RAILGUN );
-	// SURVEYOR MOD END
-
 	weaponNum = cent->currentState.weapon;
 
 	CG_RegisterWeapon( weaponNum );

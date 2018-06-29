@@ -1056,6 +1056,13 @@ static void CG_RegisterGraphics( void ) {
 		cgs.gameModels[i] = trap_R_RegisterModel( modelName );
 	}
 
+
+	// SURVEYOR MOD BEGIN
+	// always register rail core effect for beacon use
+	// XXX revisit this after determining for sure what FX to use
+	CG_RegisterWeapon( WP_RAILGUN );
+	// SURVEYOR MOD END
+
 #ifdef MISSIONPACK
 	// new stuff
 	cgs.media.patrolShader = trap_R_RegisterShaderNoMip("ui/assets/statusbar/patrol.tga");
