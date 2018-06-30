@@ -816,7 +816,7 @@ void KillBeaconLink ( gentity_t *ent, gentity_t *link_ent ) {
 	survey = G_TempEntity( link_ent->r.currentOrigin, EV_SURVEY );
 	survey->r.svFlags |= (SVF_SINGLECLIENT|SVF_BROADCAST);
 	survey->r.singleClient = ent->s.number;
-	survey->s.time = 0;
+	survey->s.time = -1;
 }
 
 void PlaceBeaconLink ( gentity_t *ent, gentity_t *beacon_ent, gentity_t *other_beacon_ent ) {
