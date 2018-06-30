@@ -552,7 +552,7 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand ("beacon");
 	trap_AddCommand ("beacondel");
 	// SURVEYOR MOD END
-    trap_AddCommand ("kill");
+	trap_AddCommand ("kill");
 	trap_AddCommand ("say");
 	trap_AddCommand ("say_team");
 	trap_AddCommand ("tell");

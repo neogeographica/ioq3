@@ -861,7 +861,7 @@ void KillBeacon ( gentity_t *ent, int num ) {
 gentity_t* PlaceBeacon ( gentity_t *ent, int num, qboolean beam, trace_t *trace ) {
 	vec3_t		end;
 	gentity_t	*zap_ent;
-	gentity_t   *beacon_ent;
+	gentity_t	*beacon_ent;
 
 	// Destroy old beacon if any.
 	KillBeacon ( ent, num );

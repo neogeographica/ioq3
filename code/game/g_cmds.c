@@ -948,9 +948,9 @@ Returns -1 if argv is invalid
 ==================
 */
 int BeaconNumberFromArgs(void) {
-	int		argcount;
+	int	argcount;
 	char	arg[MAX_TOKEN_CHARS];
-	int		argNum;
+	int	argNum;
 
 	argcount = trap_Argc();
 	if ( argcount > 2 ) {
