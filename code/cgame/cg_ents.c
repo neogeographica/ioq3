@@ -524,14 +524,15 @@ static void CG_Beacon( centity_t *cent ) {
 	refEntity_t	inner_ent;
 	refEntity_t	outer_ent;
 
+	// Draw the small core of the beacon.
 	memset( &inner_ent, 0, sizeof(inner_ent) );
 	VectorCopy( cent->lerpOrigin, inner_ent.origin );
 	VectorCopy( cent->lerpOrigin, inner_ent.oldorigin );
-
 	inner_ent.reType = RT_SPRITE;
 	inner_ent.radius = 3;
 	inner_ent.rotation = 0;
 	inner_ent.customShader = cgs.media.plasmaBallShader;
+	// Put rotation slightly out of phase between beacon 1 & beacon 2.
 	if ( cent->currentState.generic1 == 1 ) {
 		outer_ent.shaderTime = 0;
 	} else {
@@ -539,13 +540,14 @@ static void CG_Beacon( centity_t *cent ) {
 	}
 	trap_R_AddRefEntityToScene( &inner_ent );
 
+	// Draw the larger shell of the beacon.
 	memset( &outer_ent, 0, sizeof(outer_ent) );
 	VectorCopy( cent->lerpOrigin, outer_ent.origin );
 	VectorCopy( cent->lerpOrigin, outer_ent.oldorigin );
-
 	outer_ent.reType = RT_SPRITE;
 	outer_ent.radius = 10;
 	outer_ent.customShader = cgs.media.railRingsShader;
+	// Different colors & rotation phase for beacon 1 & beacon 2.
 	if ( cent->currentState.generic1 == 1 ) {
 		outer_ent.shaderTime = 0;
 		outer_ent.shaderRGBA[0] = 0xff;
@@ -560,6 +562,8 @@ static void CG_Beacon( centity_t *cent ) {
 	outer_ent.shaderRGBA[3] = 0xff;
 	trap_R_AddRefEntityToScene( &outer_ent );
 
+	// Different light color for beacon 1 & beacon 2. Red light's intensity
+	// is reduced a bit to make it appear more or less same as blue's.
 	if ( cent->currentState.generic1 == 1 ) {
 		trap_R_AddLightToScene( cent->currentState.origin2, 100, 0.75, 0.0, 0.0);
 	} else {

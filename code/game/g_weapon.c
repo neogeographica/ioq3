@@ -678,7 +678,6 @@ void Weapon_LightningFire( gentity_t *ent ) {
 	}
 }
 
-
 #ifdef MISSIONPACK
 /*
 ======================================================================
@@ -805,9 +804,15 @@ BEACON
 
 void KillBeaconLink ( gentity_t *ent, gentity_t *link_ent ) {
 	gentity_t	*survey;
+
+	// Remove the link pointer from beacon entities.
 	link_ent->chain->chain = NULL;
 	link_ent->enemy->chain = NULL;
+	// Free the link entity.
 	G_FreeEntity( link_ent );
+	// Notify the client to clear the survey distance from the HUD. Use
+	// svFlags to send to only one client, and to send regardless of PVS.
+	// A few more comments about this in PlaceBeaconLink below.
 	survey = G_TempEntity( link_ent->r.currentOrigin, EV_SURVEY );
 	survey->r.svFlags |= (SVF_SINGLECLIENT|SVF_BROADCAST);
 	survey->r.singleClient = ent->s.number;
@@ -820,6 +825,7 @@ void PlaceBeaconLink ( gentity_t *ent, gentity_t *beacon_ent ) {
 	gentity_t	*survey;
 	int		distance;
 
+	// One beacon has been placed. Search to see if the other exists.
 	other_beacon_ent = g_entities;
 	for ( ; other_beacon_ent < &g_entities[level.num_entities]; other_beacon_ent++ ) {
 		if ( !other_beacon_ent->inuse ) {
@@ -829,6 +835,9 @@ void PlaceBeaconLink ( gentity_t *ent, gentity_t *beacon_ent ) {
 			continue;
 		}
 		if ( other_beacon_ent->parent == beacon_ent->parent ) {
+			// Found other beacon, so make the link entity. Note
+			// that each beacon will have a pointer to this link,
+			// and this link will have pointers to both beacons.
 			link_ent = G_Spawn();
 			beacon_ent->chain = link_ent;
 			other_beacon_ent->chain = link_ent;
@@ -841,10 +850,17 @@ void PlaceBeaconLink ( gentity_t *ent, gentity_t *beacon_ent ) {
 			link_ent->chain = beacon_ent;
 			link_ent->enemy = other_beacon_ent;
 			trap_LinkEntity( link_ent );
+			// Calculate the survey distance.
 			distance = (int)(Distance( beacon_ent->r.currentOrigin, other_beacon_ent->r.currentOrigin ));
 			if ( distance < 0 ) {
 				distance = -distance;
 			}
+			// Notify the client to draw the survey distance on
+			// the HUD. Use svFlags to send to only one client,
+			// and to send regardless of PVS. Note that we can't
+			// use G_AddEvent for this, beause that only supports
+			// one byte of payload. Here we can make use of the
+			// "time" field which is 32 bits.
 			survey = G_TempEntity( link_ent->r.currentOrigin, EV_SURVEY );
 			survey->r.svFlags |= (SVF_SINGLECLIENT|SVF_BROADCAST);
 			survey->r.singleClient = ent->s.number;
@@ -857,16 +873,20 @@ void PlaceBeaconLink ( gentity_t *ent, gentity_t *beacon_ent ) {
 void KillBeacon ( gentity_t *ent, int num ) {
 	gentity_t	*beacon_ent;
 
+	// Search for the indicated beacon.
 	beacon_ent = g_entities;
 	for ( ; beacon_ent < &g_entities[level.num_entities]; beacon_ent++ ) {
 		if ( !beacon_ent->inuse ) {
 			continue;
 		}
 		if ( beacon_ent->count == num && beacon_ent->parent == ent ) {
+			// Found it.
 			if ( beacon_ent->chain != NULL ) {
-				// Also get rid of beacon link.
+				// Get rid of beacon link since we will no
+				// longer have both beacons placed.
 				KillBeaconLink( ent, beacon_ent->chain );
 			}
+			// Free the beacon entity.
 			G_FreeEntity( beacon_ent );
 			return;
 		}
@@ -881,15 +901,15 @@ gentity_t* PlaceBeacon ( gentity_t *ent, int num, qboolean beam, trace_t *trace 
 	// Destroy old beacon if any.
 	KillBeacon ( ent, num );
 
-	// Look at most 8192 units away from the firing point.
+	// Look up to 8192 units away from the firing point (same as railgun).
 	VectorMA (muzzle, 8192, forward, end);
 
 	// Stop at a solid or water surface (or if max distance is reached).
 	trap_Trace (trace, muzzle, NULL, NULL, end, ent->s.number, MASK_SOLID|MASK_WATER );
 
-	// We're going to do some manipulations with the trace endpoint; to avoid
-	// some creating and copying of vectors we should go ahead and spawn the
-	// beacon entity now.
+	// We're going to do manipulations with the trace endpoint; to avoid
+	// some copying of vectors we should go ahead and spawn the beacon
+	// entity now.
 	beacon_ent = G_Spawn();
 
 	// Memo-ize a location 5 units away from surface, for the light origin.
@@ -924,6 +944,7 @@ gentity_t* PlaceBeacon ( gentity_t *ent, int num, qboolean beam, trace_t *trace 
 
 void BeaconOp ( gentity_t *ent, int num ) {
 	gentity_t   *beacon_ent;
+
 	// (Re)create the selected beacon, or both if num is 0.
 	trace_t	trace;
 	AngleVectors (ent->client->ps.viewangles, forward, right, up);
@@ -937,6 +958,8 @@ void BeaconOp ( gentity_t *ent, int num ) {
 	} else {
 		beacon_ent = PlaceBeacon ( ent, num, qtrue, &trace );
 	}
+	// Also create the link if we have both beacons out.
+	// XXX can optimize this in the num=0 case by passing in the other ent too
 	PlaceBeaconLink ( ent, beacon_ent );
 }
 
