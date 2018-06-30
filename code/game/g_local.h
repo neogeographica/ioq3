@@ -587,8 +587,8 @@ qboolean G_FilterPacket (char *from);
 //
 void FireWeapon( gentity_t *ent );
 // SURVEYOR MOD BEGIN
-void FireBeacon (gentity_t *ent, int num );
-void KillBeacon (gentity_t *ent, int num );
+void BeaconOp (gentity_t *ent, int num );
+void BeaconDelOp (gentity_t *ent, int num );
 // SURVEYOR MOD END
 #ifdef MISSIONPACK
 void G_StartKamikaze( gentity_t *ent );

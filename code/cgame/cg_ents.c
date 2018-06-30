@@ -521,8 +521,8 @@ CG_Beacon
 ===============
 */
 static void CG_Beacon( centity_t *cent ) {
-	refEntity_t			inner_ent;
-	refEntity_t			outer_ent;
+	refEntity_t	inner_ent;
+	refEntity_t	outer_ent;
 
 	memset( &inner_ent, 0, sizeof(inner_ent) );
 	VectorCopy( cent->lerpOrigin, inner_ent.origin );
@@ -565,6 +565,28 @@ static void CG_Beacon( centity_t *cent ) {
 	} else {
 		trap_R_AddLightToScene( cent->currentState.origin2, 100, 0.0, 0.0, 1.0);
 	}
+}
+
+/*
+===============
+CG_BeaconLink
+===============
+*/
+static void CG_BeaconLink( centity_t *cent ) {
+	refEntity_t	ent;
+
+	memset( &ent, 0, sizeof(ent) );
+	ent.shaderTime = cg.time / 1000.0f;
+	ent.reType = RT_RAIL_CORE;
+	ent.customShader = cgs.media.railCoreShader;
+	VectorCopy( cent->lerpOrigin, ent.origin );
+	VectorCopy( cent->currentState.origin2, ent.oldorigin );
+	ent.shaderRGBA[0] = 0x80;
+	ent.shaderRGBA[1] = 0x80;
+	ent.shaderRGBA[2] = 0x80;
+	ent.shaderRGBA[3] = 0xff;
+	AxisClear( ent.axis );
+	trap_R_AddRefEntityToScene( &ent );
 }
 // SURVEYOR MOD END
 
@@ -1032,6 +1054,9 @@ static void CG_AddCEntity( centity_t *cent ) {
 	// SURVEYOR MOD BEGIN
 	case ET_BEACON:
 		CG_Beacon( cent );
+		break;
+	case ET_BEACONLINK:
+		CG_BeaconLink( cent );
 		break;
 	// SURVEYOR MOD END
 	case ET_BEAM:

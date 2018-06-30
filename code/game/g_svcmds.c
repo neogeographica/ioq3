@@ -346,6 +346,9 @@ void	Svcmd_EntityList_f (void) {
 		case ET_BEACON:
 			G_Printf("ET_BEACON           ");
 			break;
+        case ET_BEACONLINK:
+            G_Printf("ET_BEACONLINK       ");
+            break;
 		// SURVEYOR MOD END
 		case ET_BEAM:
 			G_Printf("ET_BEAM             ");

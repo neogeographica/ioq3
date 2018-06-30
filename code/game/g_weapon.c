@@ -803,49 +803,44 @@ BEACON
 ======================================================================
 */
 
-void FireBeacon ( gentity_t *ent, int num ) {
-	vec3_t		end;
-	trace_t		trace;
-	gentity_t	*zap_ent;
-	gentity_t   *beacon_ent;
+void KillBeaconLink ( gentity_t *link_ent ) {
+	link_ent->chain->chain = NULL;
+	link_ent->enemy->chain = NULL;
+	G_FreeEntity( link_ent );
+}
 
-	AngleVectors (ent->client->ps.viewangles, forward, right, up);
-	CalcMuzzlePointOrigin ( ent, ent->client->oldOrigin, forward, right, up, muzzle );
-	VectorMA (muzzle, 8192, forward, end);
+void PlaceBeaconLink ( gentity_t *beacon_ent ) {
+	gentity_t	*other_beacon_ent;
+	gentity_t	*link_ent;
 
-	trap_Trace (&trace, muzzle, NULL, NULL, end, ent->s.number, MASK_SOLID|MASK_WATER );
-
-	// snap the endpos to integers to save net bandwidth, but nudged towards the line
-	// XXX maybe don't do this for beacons?
-	SnapVectorTowards( trace.endpos, muzzle );
-
-	// create temporary beam effect
-	zap_ent = G_TempEntity( trace.endpos, EV_RAILTRAIL );
-	VectorCopy( muzzle, zap_ent->s.origin2 );
-	VectorMA( zap_ent->s.origin2, 4, right, zap_ent->s.origin2 );
-	VectorMA( zap_ent->s.origin2, -1, up, zap_ent->s.origin2 );
-	zap_ent->s.eventParm = 255;
-	zap_ent->s.clientNum = ent->s.clientNum;
-
-	// destroy old beacon if any
-	KillBeacon ( ent, num );
-
-	// create beacon
-	beacon_ent = G_Spawn();
-	G_SetOrigin( beacon_ent, trace.endpos );
-	beacon_ent->classname = "beacon";
-	beacon_ent->parent = ent;
-	beacon_ent->count = num;
-	beacon_ent->s.eType = ET_BEACON;
-	beacon_ent->s.generic1 = num;
-	beacon_ent->r.ownerNum = ent->s.number;
-	// also set a location 5 units away from surface, for light origin
-	VectorMA( trace.endpos, 5.0, trace.plane.normal, beacon_ent->s.origin2 );
-	trap_LinkEntity( beacon_ent );
+	other_beacon_ent = g_entities;
+	for ( ; other_beacon_ent < &g_entities[level.num_entities]; other_beacon_ent++ ) {
+		if ( !other_beacon_ent->inuse ) {
+			continue;
+		}
+		if ( other_beacon_ent == beacon_ent ) {
+			continue;
+		}
+		if ( other_beacon_ent->parent == beacon_ent->parent ) {
+			link_ent = G_Spawn();
+			beacon_ent->chain = link_ent;
+			other_beacon_ent->chain = link_ent;
+			G_SetOrigin( link_ent, beacon_ent->r.currentOrigin );
+			VectorCopy( other_beacon_ent->r.currentOrigin, link_ent->s.origin2 );
+			link_ent->classname = "beaconlink";
+			link_ent->parent = beacon_ent->parent;
+			link_ent->s.eType = ET_BEACONLINK;
+			link_ent->r.ownerNum = beacon_ent->r.ownerNum;
+			link_ent->chain = beacon_ent;
+			link_ent->enemy = other_beacon_ent;
+			trap_LinkEntity( link_ent );
+			return;
+		}
+	}
 }
 
 void KillBeacon ( gentity_t *ent, int num ) {
-	gentity_t   *beacon_ent;
+	gentity_t	*beacon_ent;
 
 	beacon_ent = g_entities;
 	for ( ; beacon_ent < &g_entities[level.num_entities]; beacon_ent++ ) {
@@ -853,9 +848,90 @@ void KillBeacon ( gentity_t *ent, int num ) {
 			continue;
 		}
 		if ( beacon_ent->count == num && beacon_ent->parent == ent ) {
+			if ( beacon_ent->chain != NULL ) {
+				// Also get rid of beacon link.
+				KillBeaconLink( beacon_ent->chain );
+			}
 			G_FreeEntity( beacon_ent );
-			break;
+			return;
 		}
+	}
+}
+
+gentity_t* PlaceBeacon ( gentity_t *ent, int num, qboolean beam, trace_t *trace ) {
+	vec3_t		end;
+	gentity_t	*zap_ent;
+	gentity_t   *beacon_ent;
+
+	// Destroy old beacon if any.
+	KillBeacon ( ent, num );
+
+	// Look at most 8192 units away from the firing point.
+	VectorMA (muzzle, 8192, forward, end);
+
+	// Stop at a solid or water surface (or if max distance is reached).
+	trap_Trace (trace, muzzle, NULL, NULL, end, ent->s.number, MASK_SOLID|MASK_WATER );
+
+	// We're going to do some manipulations with the trace endpoint; to avoid
+	// some creating and copying of vectors we should go ahead and spawn the
+	// beacon entity now.
+	beacon_ent = G_Spawn();
+
+	// Memo-ize a location 5 units away from surface, for the light origin.
+	VectorMA( trace->endpos, 5.0, trace->plane.normal, beacon_ent->s.origin2 );
+	// And snap that position to integers.
+	SnapVector( beacon_ent->s.origin2 );
+	// Now snap the beacon location too, biased away from the surface.
+	SnapVectorTowards( trace->endpos, beacon_ent->s.origin2 );
+	G_SetOrigin( beacon_ent, trace->endpos );
+
+	// Fill in the remaining beacon props.
+	beacon_ent->classname = "beacon";
+	beacon_ent->parent = ent;
+	beacon_ent->count = num;
+	beacon_ent->s.eType = ET_BEACON;
+	beacon_ent->s.generic1 = num;
+	beacon_ent->r.ownerNum = ent->s.number;
+	trap_LinkEntity( beacon_ent );
+
+	// Create the firing beam effect if requested.
+	if ( beam == qtrue ) {
+		zap_ent = G_TempEntity( trace->endpos, EV_RAILTRAIL );
+		VectorCopy( muzzle, zap_ent->s.origin2 );
+		VectorMA( zap_ent->s.origin2, 4, right, zap_ent->s.origin2 );
+		VectorMA( zap_ent->s.origin2, -1, up, zap_ent->s.origin2 );
+		zap_ent->s.eventParm = 255;
+		zap_ent->s.clientNum = ent->s.clientNum;
+	}
+
+	return beacon_ent;
+}
+
+void BeaconOp ( gentity_t *ent, int num ) {
+	gentity_t   *beacon_ent;
+	// (Re)create the selected beacon, or both if num is 0.
+	trace_t	trace;
+	AngleVectors (ent->client->ps.viewangles, forward, right, up);
+	CalcMuzzlePointOrigin ( ent, ent->client->oldOrigin, forward, right, up, muzzle );
+	if ( num == 0 ) {
+		PlaceBeacon ( ent, 1, qtrue, &trace );
+		// Fire the second beacon away from the surface where the first is.
+		VectorCopy( trace.endpos, muzzle );
+		VectorCopy( trace.plane.normal, forward );
+		beacon_ent = PlaceBeacon ( ent, 2, qfalse, &trace );
+	} else {
+		beacon_ent = PlaceBeacon ( ent, num, qtrue, &trace );
+	}
+	PlaceBeaconLink ( beacon_ent );
+}
+
+void BeaconDelOp ( gentity_t *ent, int num ) {
+	// Delete the selected beacon, or both if num is 0.
+	if (num != 1 ) {
+		KillBeacon ( ent, 2 );
+	}
+	if (num != 2 ) {
+		KillBeacon ( ent, 1 );
 	}
 }
 // SURVEYOR MOD END
