@@ -461,6 +461,9 @@ static void CG_MapRestart( void ) {
 	cg.rewardStack = 0;
 	cg.intermissionStarted = qfalse;
 	cg.levelShot = qfalse;
+// SURVEYOR MOD BEGIN
+	cg.survey_distance = 0;
+// SURVEYOR MOD END
 
 	cgs.voteTime = 0;
 

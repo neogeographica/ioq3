@@ -959,6 +959,14 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		CG_ScorePlum( cent->currentState.otherEntityNum, cent->lerpOrigin, cent->currentState.time );
 		break;
 
+// SURVEYOR MOD BEGIN
+	case EV_SURVEY:
+		DEBUGNAME("EV_SURVEY");
+		// Had to use a state field that was more than 8 bits...
+		cg.survey_distance = cent->currentState.time;
+		break;
+// SURVEYOR MOD END
+
 	//
 	// missile impacts
 	//

@@ -803,15 +803,22 @@ BEACON
 ======================================================================
 */
 
-void KillBeaconLink ( gentity_t *link_ent ) {
+void KillBeaconLink ( gentity_t *ent, gentity_t *link_ent ) {
+	gentity_t	*survey;
 	link_ent->chain->chain = NULL;
 	link_ent->enemy->chain = NULL;
 	G_FreeEntity( link_ent );
+	survey = G_TempEntity( link_ent->r.currentOrigin, EV_SURVEY );
+	survey->r.svFlags |= (SVF_SINGLECLIENT|SVF_BROADCAST);
+	survey->r.singleClient = ent->s.number;
+	survey->s.time = 0;
 }
 
-void PlaceBeaconLink ( gentity_t *beacon_ent ) {
+void PlaceBeaconLink ( gentity_t *ent, gentity_t *beacon_ent ) {
 	gentity_t	*other_beacon_ent;
 	gentity_t	*link_ent;
+	gentity_t	*survey;
+	int		distance;
 
 	other_beacon_ent = g_entities;
 	for ( ; other_beacon_ent < &g_entities[level.num_entities]; other_beacon_ent++ ) {
@@ -834,6 +841,15 @@ void PlaceBeaconLink ( gentity_t *beacon_ent ) {
 			link_ent->chain = beacon_ent;
 			link_ent->enemy = other_beacon_ent;
 			trap_LinkEntity( link_ent );
+			distance = (int)(Distance( beacon_ent->r.currentOrigin, other_beacon_ent->r.currentOrigin ));
+			if ( distance < 0 ) {
+				distance = -distance;
+			}
+			G_Printf( "distance is %i\n", distance );
+			survey = G_TempEntity( link_ent->r.currentOrigin, EV_SURVEY );
+			survey->r.svFlags |= (SVF_SINGLECLIENT|SVF_BROADCAST);
+			survey->r.singleClient = ent->s.number;
+			survey->s.time = distance;
 			return;
 		}
 	}
@@ -850,7 +866,7 @@ void KillBeacon ( gentity_t *ent, int num ) {
 		if ( beacon_ent->count == num && beacon_ent->parent == ent ) {
 			if ( beacon_ent->chain != NULL ) {
 				// Also get rid of beacon link.
-				KillBeaconLink( beacon_ent->chain );
+				KillBeaconLink( ent, beacon_ent->chain );
 			}
 			G_FreeEntity( beacon_ent );
 			return;
@@ -922,7 +938,7 @@ void BeaconOp ( gentity_t *ent, int num ) {
 	} else {
 		beacon_ent = PlaceBeacon ( ent, num, qtrue, &trace );
 	}
-	PlaceBeaconLink ( beacon_ent );
+	PlaceBeaconLink ( ent, beacon_ent );
 }
 
 void BeaconDelOp ( gentity_t *ent, int num ) {

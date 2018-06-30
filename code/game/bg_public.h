@@ -427,6 +427,9 @@ typedef enum {
 
 	EV_GIB_PLAYER,			// gib a previously living player
 	EV_SCOREPLUM,			// score plum
+// SURVEYOR MOD BEGIN
+	EV_SURVEY,
+// SURVEYOR MOD END
 
 //#ifdef MISSIONPACK
 	EV_PROXIMITY_MINE_STICK,

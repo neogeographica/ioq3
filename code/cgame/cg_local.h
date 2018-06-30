@@ -633,6 +633,9 @@ typedef struct {
 
 	//qboolean cameraMode;		// if rendering from a loaded camera
 
+// SURVEYOR MOD BEGIN
+	int survey_distance;
+// SURVEYOR MOD END
 
 	// development tool
 	refEntity_t		testModelEntity;

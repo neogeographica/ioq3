@@ -794,6 +794,22 @@ static float CG_DrawTimer( float y ) {
 	return y + BIGCHAR_HEIGHT + 4;
 }
 
+// SURVEYOR MOD BEGIN
+/*
+=================
+CG_DrawSurvey
+=================
+*/
+static void CG_DrawSurvey( void ) {
+	char	*s;
+	float	w;
+
+	s = va( "%i", cg.survey_distance );
+	w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
+	CG_DrawBigString( 320 - w / 2, 200, s, 0.75f );
+	trap_R_SetColor( NULL );
+}
+// SURVEYOR MOD END
 
 /*
 =================
@@ -2616,6 +2632,11 @@ static void CG_Draw2D(stereoFrame_t stereoFrame)
 	cg.scoreBoardShowing = CG_DrawScoreboard();
 	if ( !cg.scoreBoardShowing) {
 		CG_DrawCenterString();
+		// SURVEYOR MOD BEGIN
+		if ( cg.survey_distance > 0 ) {
+			CG_DrawSurvey();
+		}
+		// SURVEYOR MOD END
 	}
 }
 
