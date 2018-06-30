@@ -561,7 +561,7 @@ static void CG_Beacon( centity_t *cent ) {
 	trap_R_AddRefEntityToScene( &outer_ent );
 
 	if ( cent->currentState.generic1 == 1 ) {
-		trap_R_AddLightToScene( cent->currentState.origin2, 100, 0.5, 0.0, 0.0);
+		trap_R_AddLightToScene( cent->currentState.origin2, 100, 0.75, 0.0, 0.0);
 	} else {
 		trap_R_AddLightToScene( cent->currentState.origin2, 100, 0.0, 0.0, 1.0);
 	}
