@@ -845,7 +845,6 @@ void PlaceBeaconLink ( gentity_t *ent, gentity_t *beacon_ent ) {
 			if ( distance < 0 ) {
 				distance = -distance;
 			}
-			G_Printf( "distance is %i\n", distance );
 			survey = G_TempEntity( link_ent->r.currentOrigin, EV_SURVEY );
 			survey->r.svFlags |= (SVF_SINGLECLIENT|SVF_BROADCAST);
 			survey->r.singleClient = ent->s.number;
