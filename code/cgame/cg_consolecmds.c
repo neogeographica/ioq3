@@ -180,6 +180,18 @@ static void CG_spLose_f( void) {
 
 #endif
 
+// SURVEYOR MOD BEGIN
+static void CG_SurveySays_f( void ) {
+	char	command[32];
+
+	if ( cg.survey_distance == 0 ) {
+		return;
+	}
+	Com_sprintf( command, 32, "say survey says: %i units", cg.survey_distance );
+	trap_SendClientCommand( command );
+}
+// SURVEYOR MOD END
+
 static void CG_TellTarget_f( void ) {
 	int		clientNum;
 	char	command[128];
@@ -468,6 +480,9 @@ static consoleCommand_t	commands[] = {
 	{ "weapprev", CG_PrevWeapon_f },
 	{ "weapon", CG_Weapon_f },
 	{ "tcmd", CG_TargetCommand_f },
+	// SURVEYOR MOD BEGIN
+	{ "survey_says", CG_SurveySays_f },
+	// SURVEYOR MOD END
 	{ "tell_target", CG_TellTarget_f },
 	{ "tell_attacker", CG_TellAttacker_f },
 #ifdef MISSIONPACK
