@@ -184,7 +184,7 @@ static void CG_spLose_f( void) {
 static void CG_SurveySays_f( void ) {
 	char	command[32];
 
-	if ( cg.survey_distance == 0 ) {
+	if ( cg.survey_distance < 0 ) {
 		return;
 	}
 	Com_sprintf( command, 32, "say survey says: %i units", cg.survey_distance );

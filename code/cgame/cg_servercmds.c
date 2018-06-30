@@ -462,7 +462,7 @@ static void CG_MapRestart( void ) {
 	cg.intermissionStarted = qfalse;
 	cg.levelShot = qfalse;
 // SURVEYOR MOD BEGIN
-	cg.survey_distance = 0;
+	cg.survey_distance = -1;
 // SURVEYOR MOD END
 
 	cgs.voteTime = 0;

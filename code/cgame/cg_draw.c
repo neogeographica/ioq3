@@ -2633,7 +2633,7 @@ static void CG_Draw2D(stereoFrame_t stereoFrame)
 	if ( !cg.scoreBoardShowing) {
 		CG_DrawCenterString();
 		// SURVEYOR MOD BEGIN
-		if ( cg.survey_distance > 0 ) {
+		if ( cg.survey_distance >= 0 ) {
 			CG_DrawSurvey();
 		}
 		// SURVEYOR MOD END

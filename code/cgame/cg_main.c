@@ -1859,6 +1859,9 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum ) {
 	memset( cg_items, 0, sizeof(cg_items) );
 
 	cg.clientNum = clientNum;
+// SURVEYOR MOD BEGIN
+	cg.survey_distance = -1;
+// SURVEYOR MOD END
 
 	cgs.processedSnapshotNum = serverMessageNum;
 	cgs.serverCommandSequence = serverCommandSequence;
