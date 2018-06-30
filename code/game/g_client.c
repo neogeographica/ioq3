@@ -1269,6 +1269,11 @@ void ClientDisconnect( int clientNum ) {
 		return;
 	}
 
+	// SURVEYOR MOD BEGIN
+	// Remove any beacons placed by client.
+	BeaconDelOp( ent, 0 );
+	// SURVEYOR MOD END
+
 	// stop any following clients
 	for ( i = 0 ; i < level.maxclients ; i++ ) {
 		if ( level.clients[i].sess.sessionTeam == TEAM_SPECTATOR
