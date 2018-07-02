@@ -1,0 +1,3 @@
+# Windows-style LFs
+*.txt text eol=crlf
+*.cfg text eol=crlf
