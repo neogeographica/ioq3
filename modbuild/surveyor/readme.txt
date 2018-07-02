@@ -28,7 +28,7 @@ The mod adds the following commands that can be used in-game, either by typing t
 
 * survey_says: This command causes the player to say a message that includes the current distance between beacons. (If both beacons are not active, this command does nothing.) This is an easy way to get a specific distance to be logged into the Q3 console log. Or I suppose it could be used in multiplayer surveyor-ing.
 
-This mod package includes an autoexec.cfg file that binds "beacon 1" and "beacon 2" to the left/right mouse buttons, and binds "beacon" to the middle mouse button. Obviously you can change this however you want.
+This mod package includes a keys.cfg file that binds "beacon 1" and "beacon 2" to the left/right mouse buttons, "beacon" to the middle mouse button, and "beacondel" to backspace. You can do "exec keys.cfg" in the console to get these bindings if it sounds like that's what you would want.
 
 
 TECHNICAL NOTES
