@@ -823,7 +823,7 @@ void PlaceBeaconLink ( gentity_t *ent, gentity_t *beacon_ent, gentity_t *other_b
 	gentity_t	*search;
 	gentity_t	*link_ent;
 	gentity_t	*survey;
-	int		distance;
+	vec_t		distance;
 
 	// One beacon has been placed. If necessary, search to see if the
 	// other exists.
@@ -862,7 +862,7 @@ void PlaceBeaconLink ( gentity_t *ent, gentity_t *beacon_ent, gentity_t *other_b
 	link_ent->enemy = other_beacon_ent;
 	trap_LinkEntity( link_ent );
 	// Calculate the survey distance.
-	distance = (int)(Distance( beacon_ent->r.currentOrigin, other_beacon_ent->r.currentOrigin ));
+	distance = Distance( beacon_ent->pos1, other_beacon_ent->pos1 );
 	if ( distance < 0 ) {
 		distance = -distance;
 	}
@@ -874,7 +874,8 @@ void PlaceBeaconLink ( gentity_t *ent, gentity_t *beacon_ent, gentity_t *other_b
 	survey = G_TempEntity( link_ent->r.currentOrigin, EV_SURVEY );
 	survey->r.svFlags |= (SVF_SINGLECLIENT|SVF_BROADCAST);
 	survey->r.singleClient = ent->s.number;
-	survey->s.time = distance;
+	// Adding 0.5 here to get rounding rather than truncation.
+	survey->s.time = (int)(distance + 0.5);
 }
 
 void KillBeacon ( gentity_t *ent, int num ) {
@@ -919,6 +920,8 @@ gentity_t* PlaceBeacon ( gentity_t *ent, int num, qboolean beam, trace_t *trace 
 	// entity now.
 	beacon_ent = G_Spawn();
 
+	// Save the exact location for later use in distance calc.
+	VectorCopy( trace->endpos, beacon_ent->pos1 );
 	// Memo-ize a location 5 units away from surface, for the light origin.
 	VectorMA( trace->endpos, 5.0, trace->plane.normal, beacon_ent->s.origin2 );
 	// And snap that position to integers.
