@@ -878,7 +878,7 @@ void PlaceBeaconLink ( gentity_t *ent, gentity_t *beacon_ent, gentity_t *other_b
 	survey->s.time = (int)(distance + 0.5);
 }
 
-void KillBeacon ( gentity_t *ent, int num ) {
+qboolean KillBeacon ( gentity_t *ent, int num ) {
 	gentity_t	*beacon_ent;
 
 	// Search for the indicated beacon.
@@ -896,9 +896,10 @@ void KillBeacon ( gentity_t *ent, int num ) {
 			}
 			// Free the beacon entity.
 			G_FreeEntity( beacon_ent );
-			return;
+			return qtrue;
 		}
 	}
+	return qfalse;
 }
 
 gentity_t* PlaceBeacon ( gentity_t *ent, int num, qboolean beam, trace_t *trace ) {
@@ -981,20 +982,24 @@ void BeaconOp ( gentity_t *ent, int num ) {
 }
 
 void BeaconDelOp ( gentity_t *ent, int num ) {
+	qboolean	play_sound;
 	gentity_t	*sound_ent;
 
 	// Delete the selected beacon, or both if num is 0.
-	if (num != 1 ) {
-		KillBeacon ( ent, 2 );
+	play_sound = qfalse;
+	if ( num != 1 ) {
+		play_sound = KillBeacon ( ent, 2 ) || play_sound;
 	}
-	if (num != 2 ) {
-		KillBeacon ( ent, 1 );
+	if ( num != 2 ) {
+		play_sound = KillBeacon ( ent, 1 ) || play_sound;
 	}
-	// And give some audio feedback.
-	sound_ent = G_TempEntity( ent->client->oldOrigin, EV_GLOBAL_SOUND );
-	sound_ent->s.eventParm = G_SoundIndex( "sound/items/armourfield.wav" );
-	sound_ent->r.svFlags |= (SVF_SINGLECLIENT|SVF_BROADCAST);
-	sound_ent->r.singleClient = ent->s.number;
+	// Give some audio feedback if at least one was removed.
+	if ( play_sound == qtrue ) {
+		sound_ent = G_TempEntity( ent->client->oldOrigin, EV_GLOBAL_SOUND );
+		sound_ent->s.eventParm = G_SoundIndex( "sound/items/armourfield.wav" );
+		sound_ent->r.svFlags |= (SVF_SINGLECLIENT|SVF_BROADCAST);
+		sound_ent->r.singleClient = ent->s.number;
+	}
 }
 // SURVEYOR MOD END
 
