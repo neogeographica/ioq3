@@ -1057,7 +1057,7 @@ static void CG_RegisterGraphics( void ) {
 	}
 
 	// SURVEYOR MOD BEGIN
-	// always register rail core effect for beacon use
+	// always register rail effects for beacon use
 	CG_RegisterWeapon( WP_RAILGUN );
 	// SURVEYOR MOD END
 
