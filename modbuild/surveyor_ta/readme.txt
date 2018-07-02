@@ -8,7 +8,9 @@ The mod also allows a method of beacon placement where you shoot out the red bea
 
 You can also remove or re-place either beacon.
 
-A fired beacon will stop and attach to the first solid or liquid surface it encounters. Note that for liquids it will stop if going from non-liquid to liquid, but not vice versa.
+A fired beacon will stop at the first surface it encounters. A couple of things to note:
+* It will stop at a liquid surface if it is going into the liquid, but not if it is going out of the liquid.
+* When a moving structure stops the beacon, the beacon will stay where it stopped. It won't follow the mover.
 
 
 INSTALLATION
