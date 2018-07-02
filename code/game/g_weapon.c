@@ -903,8 +903,9 @@ void KillBeacon ( gentity_t *ent, int num ) {
 
 gentity_t* PlaceBeacon ( gentity_t *ent, int num, qboolean beam, trace_t *trace ) {
 	vec3_t		end;
-	gentity_t	*zap_ent;
 	gentity_t	*beacon_ent;
+	gentity_t	*zap_ent;
+	gentity_t	*sound_ent;
 
 	// Destroy old beacon if any.
 	KillBeacon ( ent, num );
@@ -939,7 +940,7 @@ gentity_t* PlaceBeacon ( gentity_t *ent, int num, qboolean beam, trace_t *trace 
 	beacon_ent->r.ownerNum = ent->s.number;
 	trap_LinkEntity( beacon_ent );
 
-	// Create the firing beam effect if requested.
+	// Create the firing beam effect (and sound) if requested.
 	if ( beam == qtrue ) {
 		zap_ent = G_TempEntity( trace->endpos, EV_RAILTRAIL );
 		VectorCopy( muzzle, zap_ent->s.origin2 );
@@ -947,6 +948,10 @@ gentity_t* PlaceBeacon ( gentity_t *ent, int num, qboolean beam, trace_t *trace 
 		VectorMA( zap_ent->s.origin2, -1, up, zap_ent->s.origin2 );
 		zap_ent->s.eventParm = 255;
 		zap_ent->s.clientNum = ent->s.clientNum;
+		sound_ent = G_TempEntity( muzzle, EV_GLOBAL_SOUND );
+		sound_ent->s.eventParm = G_SoundIndex( "sound/weapons/plasma/hyprbf1a.wav" );
+		sound_ent->r.svFlags |= (SVF_SINGLECLIENT|SVF_BROADCAST);
+		sound_ent->r.singleClient = ent->s.number;
 	}
 
 	return beacon_ent;
@@ -976,6 +981,8 @@ void BeaconOp ( gentity_t *ent, int num ) {
 }
 
 void BeaconDelOp ( gentity_t *ent, int num ) {
+	gentity_t	*sound_ent;
+
 	// Delete the selected beacon, or both if num is 0.
 	if (num != 1 ) {
 		KillBeacon ( ent, 2 );
@@ -983,6 +990,11 @@ void BeaconDelOp ( gentity_t *ent, int num ) {
 	if (num != 2 ) {
 		KillBeacon ( ent, 1 );
 	}
+	// And give some audio feedback.
+	sound_ent = G_TempEntity( ent->client->oldOrigin, EV_GLOBAL_SOUND );
+	sound_ent->s.eventParm = G_SoundIndex( "sound/items/armourfield.wav" );
+	sound_ent->r.svFlags |= (SVF_SINGLECLIENT|SVF_BROADCAST);
+	sound_ent->r.singleClient = ent->s.number;
 }
 // SURVEYOR MOD END
 
