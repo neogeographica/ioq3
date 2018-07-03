@@ -24,6 +24,7 @@ zip pak0.zip vm/cgame.qvm vm/qagame.qvm
 popd
 mv -f $BUILD_DIR/baseq3/pak0.zip modbuild/surveyor/pak0.pk3
 cd modbuild
+rm surveyor.zip
 zip -r surveyor.zip surveyor
 cd ..
 
@@ -32,5 +33,6 @@ zip pak0.zip vm/cgame.qvm vm/qagame.qvm
 popd
 mv -f $BUILD_DIR/missionpack/pak0.zip modbuild/surveyor_ta/pak0.pk3
 cd modbuild
+rm surveyor_ta.zip
 zip -r surveyor_ta.zip surveyor_ta
 cd ..
