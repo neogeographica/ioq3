@@ -22,15 +22,15 @@ fi
 pushd $BUILD_DIR/baseq3
 zip pak0.zip vm/cgame.qvm vm/qagame.qvm
 popd
-pushd modbuild
-mv -f ../$BUILD_DIR/baseq3/pak0.zip surveyor/pak0.pk3
+mv -f $BUILD_DIR/baseq3/pak0.zip modbuild/surveyor/pak0.pk3
+cd modbuild
 zip -r surveyor.zip surveyor
-popd
+cd ..
 
 pushd $BUILD_DIR/missionpack
 zip pak0.zip vm/cgame.qvm vm/qagame.qvm
 popd
-pushd modbuild
-mv -f ../$BUILD_DIR/missionpack/pak0.zip surveyor_ta/pak0.pk3
+mv -f $BUILD_DIR/missionpack/pak0.zip modbuild/surveyor_ta/pak0.pk3
+cd modbuild
 zip -r surveyor_ta.zip surveyor_ta
-popd
+cd ..
